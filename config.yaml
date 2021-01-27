@@ -1,0 +1,9 @@
+#File di configurazione, inserisci intervallo in secondi su read_interval
+db_address: localhost
+db_port: 3306
+db_user: root
+db_pass: 
+db_name: spring
+db_table: meteo
+read_interval: 60
+sensor_endpoint: http://example.com/
