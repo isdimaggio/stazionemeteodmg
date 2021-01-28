@@ -25,21 +25,24 @@ q.execute("CREATE TABLE IF NOT EXISTS `" + config["db_table"] + "` (id_meteo int
 print("[i] Connesso al database...")
 
 def fetch(): 
-    xmldata = requests.get(config["sensor_endpoint"])
-    xdp = minidom.parseString(xmldata.text)
-    xml_date = xdp.getElementsByTagName("date")[0].firstChild.nodeValue
-    xml_time = xdp.getElementsByTagName("time")[0].firstChild.nodeValue
-    xml_temp = xdp.getElementsByTagName("temp")[0].firstChild.nodeValue
-    xml_press = xdp.getElementsByTagName("press")[0].firstChild.nodeValue
-    xml_umidit = xdp.getElementsByTagName("umidit")[0].firstChild.nodeValue
-    dt = parse(xml_date + ", " + xml_time)
-    insert = ("INSERT INTO `" + config["db_table"] + "` (date, time, temp, press, umidit) VALUES (%s, %s, %s, %s, %s);")
-    insertdata = (dt.date(), dt.time(), float(xml_temp), float(xml_press), float(xml_umidit))
-    q = sqlink.cursor()
-    q.execute(insert, insertdata)
-    sqlink.commit()
-    log = "[{}][{}] - Nuova lettura dal sensore: Temperatura={} C°, Pressione={} Kpa, Umidità={} %".format(xml_date, xml_time, xml_temp, xml_press, xml_umidit)
-    print(log)
+    try:
+        xmldata = requests.get(config["sensor_endpoint"])
+        xdp = minidom.parseString(xmldata.text)
+        xml_date = xdp.getElementsByTagName("date")[0].firstChild.nodeValue
+        xml_time = xdp.getElementsByTagName("time")[0].firstChild.nodeValue
+        xml_temp = xdp.getElementsByTagName("temp")[0].firstChild.nodeValue
+        xml_press = xdp.getElementsByTagName("press")[0].firstChild.nodeValue
+        xml_umidit = xdp.getElementsByTagName("umidit")[0].firstChild.nodeValue
+        dt = parse(xml_date + ", " + xml_time)
+        insert = ("INSERT INTO `" + config["db_table"] + "` (date, time, temp, press, umidit) VALUES (%s, %s, %s, %s, %s);")
+        insertdata = (dt.date(), dt.time(), float(xml_temp), float(xml_press), float(xml_umidit))
+        q = sqlink.cursor()
+        q.execute(insert, insertdata)
+        sqlink.commit()
+        log = "[{}][{}] - Nuova lettura dal sensore: Temperatura={} C°, Pressione={} Kpa, Umidità={} %".format(xml_date, xml_time, xml_temp, xml_press, xml_umidit)
+        print(log)
+    except Exception as e:
+        print("[!] Eccezione lanciata: " + str(e))
 
 while True:
     fetch()
